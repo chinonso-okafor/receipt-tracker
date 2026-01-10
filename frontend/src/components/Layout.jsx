@@ -230,23 +230,24 @@ const Layout = ({ children }) => {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-xl border-t border-border flex justify-around items-center z-50 px-4 pb-2 mobile-nav">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Button
-              key={item.path}
-              variant="ghost"
-              className={`flex flex-col items-center gap-1 h-auto py-2 px-4 ${
-                isActive ? "text-primary" : "text-muted-foreground"
-              }`}
-              onClick={() => navigate(item.path)}
-            >
-              <item.icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
-              <span className="text-xs font-medium">{item.label}</span>
-            </Button>
-          );
-        })}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-50 safe-area-bottom">
+        <div className="flex justify-around items-center h-16 px-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <button
+                key={item.path}
+                className={`flex flex-col items-center justify-center flex-1 py-2 px-1 ${
+                  isActive ? "text-primary" : "text-muted-foreground"
+                }`}
+                onClick={() => navigate(item.path)}
+              >
+                <item.icon className={`h-6 w-6 ${isActive ? "text-primary" : ""}`} />
+                <span className="text-xs font-medium mt-1">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Main Content */}
