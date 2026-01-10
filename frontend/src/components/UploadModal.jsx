@@ -435,15 +435,36 @@ const UploadModal = ({ open, onClose, onSuccess }) => {
                 </div>
 
                 <div>
-                  <Label>Amount</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={extractedData.amount}
-                    onChange={(e) => updateExtractedData("amount", parseFloat(e.target.value))}
-                    className="mt-1"
-                    data-testid="amount-input"
-                  />
+                  <Label>Amount & Currency</Label>
+                  <div className="flex gap-2 mt-1">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                        {extractedData.currency === "CAD" ? "C$" : extractedData.currency === "GBP" ? "£" : extractedData.currency === "EUR" ? "€" : "$"}
+                      </span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={extractedData.amount}
+                        onChange={(e) => updateExtractedData("amount", parseFloat(e.target.value) || 0)}
+                        className="pl-8"
+                        data-testid="amount-input"
+                      />
+                    </div>
+                    <Select
+                      value={extractedData.currency || "USD"}
+                      onValueChange={(value) => updateExtractedData("currency", value)}
+                    >
+                      <SelectTrigger className="w-24" data-testid="currency-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="CAD">CAD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="col-span-2">
