@@ -274,15 +274,20 @@ async def logout(request: Request, response: Response):
 # ============== RECEIPT SCANNING ==============
 
 CATEGORIES = [
+    "Groceries",
     "Meals & Dining",
     "Travel",
+    "Transportation",
     "Office Supplies",
     "Equipment",
     "Software & Subscriptions",
     "Utilities",
     "Marketing",
     "Professional Services",
-    "Transportation",
+    "Healthcare",
+    "Entertainment",
+    "Shopping",
+    "Shipping & Postage",
     "Other"
 ]
 
