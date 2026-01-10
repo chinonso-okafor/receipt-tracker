@@ -33,7 +33,7 @@ class ReceiptScannerAPITester:
             "details": details
         })
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None, expect_json=True):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
         test_headers = {'Content-Type': 'application/json'}
@@ -59,13 +59,23 @@ class ReceiptScannerAPITester:
             
             if not success:
                 try:
-                    error_data = response.json()
-                    details += f", Error: {error_data.get('detail', 'Unknown error')}"
+                    if expect_json:
+                        error_data = response.json()
+                        details += f", Error: {error_data.get('detail', 'Unknown error')}"
+                    else:
+                        details += f", Content-Type: {response.headers.get('content-type', 'unknown')}"
                 except:
                     details += f", Response: {response.text[:100]}"
             
             self.log_test(name, success, details)
-            return success, response.json() if success and response.content else {}
+            
+            if success and expect_json and response.content:
+                try:
+                    return success, response.json()
+                except:
+                    return success, {}
+            else:
+                return success, {}
 
         except Exception as e:
             self.log_test(name, False, f"Exception: {str(e)}")
