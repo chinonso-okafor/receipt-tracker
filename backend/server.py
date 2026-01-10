@@ -438,38 +438,21 @@ Only return valid JSON, no other text."""
                 headers=headers,
                 json=request_body
             )
-                json={
-                    "model": "claude-sonnet-4-20250514",
-                    "max_tokens": 1024,
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "image",
-                                    "source": {
-                                        "type": "base64",
-                                        "media_type": detected_type,
-                                        "data": image_base64
-                                    }
-                                },
-                                {
-                                    "type": "text",
-                                    "text": prompt
-                                }
-                            ]
-                        }
-                    ]
-                }
-            )
         
         if api_response.status_code != 200:
             error_detail = api_response.json() if api_response.headers.get("content-type", "").startswith("application/json") else api_response.text
-            logger.error(f"Anthropic API error: {error_detail}")
+            logger.error(f"AI API error: {error_detail}")
             raise HTTPException(status_code=500, detail=f"AI service error: {api_response.status_code}")
         
         response_data = api_response.json()
-        response_text = response_data["content"][0]["text"]
+        
+        # Parse response based on API format
+        if LLM_API_KEY.startswith('sk-emergent'):
+            # OpenAI-compatible format
+            response_text = response_data["choices"][0]["message"]["content"]
+        else:
+            # Anthropic native format
+            response_text = response_data["content"][0]["text"]
         
         # Clean up response if it has markdown code blocks
         if "```json" in response_text:
