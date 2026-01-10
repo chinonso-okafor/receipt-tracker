@@ -98,18 +98,30 @@ const Reports = () => {
         throw new Error("Failed to generate report");
       }
 
-      // Download the file
+      // Download the file - using a more compatible method
       const blob = await response.blob();
+      const filename = `expense_report_${format(startDate, "yyyy-MM-dd")}_${format(endDate, "yyyy-MM-dd")}.${reportFormat === "pdf" ? "pdf" : "xlsx"}`;
+      
+      // Create download link
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expense_report_${format(startDate, "yyyy-MM-dd")}_${format(endDate, "yyyy-MM-dd")}.${reportFormat === "pdf" ? "pdf" : "xlsx"}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.style.display = "none";
+      
+      // Append to body, click, and cleanup
+      document.body.appendChild(link);
+      
+      // Use setTimeout for better mobile compatibility
+      setTimeout(() => {
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+      }, 0);
 
-      toast.success("Report generated successfully!");
+      toast.success(`Report "${filename}" downloaded!`);
     } catch (error) {
       console.error("Error generating report:", error);
       toast.error("Failed to generate report");
