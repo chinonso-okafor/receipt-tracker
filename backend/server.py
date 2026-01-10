@@ -370,15 +370,27 @@ async def scan_receipt(
 Be precise with the amount. If you can't read something clearly, make your best guess and lower the confidence score.
 Only return valid JSON, no other text."""
 
-        # Use direct API call to Anthropic
+        # Determine API endpoint based on key type
+        # Emergent keys start with 'sk-emergent', Anthropic keys start with 'sk-ant'
+        if LLM_API_KEY.startswith('sk-emergent'):
+            api_url = "https://ai.emergentmethods.ai/v1/messages"
+            headers = {
+                "Authorization": f"Bearer {LLM_API_KEY}",
+                "content-type": "application/json"
+            }
+        else:
+            api_url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": LLM_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            }
+        
+        # Use direct API call
         async with httpx.AsyncClient(timeout=60.0) as http_client:
             api_response = await http_client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": LLM_API_KEY,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json"
-                },
+                api_url,
+                headers=headers,
                 json={
                     "model": "claude-sonnet-4-20250514",
                     "max_tokens": 1024,
