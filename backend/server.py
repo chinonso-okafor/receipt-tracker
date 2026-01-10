@@ -393,13 +393,20 @@ IMPORTANT INSTRUCTIONS:
 3. For payment method, look for: "VISA", "MASTERCARD", "MC", "AMEX", "DEBIT", "CASH", "INTERAC", card ending numbers, etc.
 4. The receipt_number is any transaction ID, order number, reference number, or receipt number printed on the receipt.
 5. Extract ALL line items with their prices.
-6. CURRENCY DETECTION - Detect the currency based on:
-   - Explicit currency symbols or codes on receipt (CAD, USD, EUR, GBP, $, €, £)
-   - Vendor location (Canadian stores = CAD, US stores = USD, etc.)
-   - Common Canadian retailers: Tim Hortons, Canadian Tire, Shoppers Drug Mart, Loblaws, Metro, Sobeys = CAD
-   - Common US retailers: Walmart US, Target, Best Buy US, Costco US = USD
-   - If receipt shows "GST/HST" or "PST" = Canadian (CAD)
-   - If receipt shows only "Sales Tax" = likely US (USD)
+6. CURRENCY DETECTION - This is CRITICAL. Detect the currency based on these rules:
+   - Look for explicit currency codes on receipt: CAD, USD, EUR, GBP
+   - Look for tax indicators:
+     * GST, HST, PST, QST = CANADIAN receipt = CAD
+     * "Sales Tax" only (no GST/HST/PST) = likely US = USD
+   - Canadian stores (ALWAYS use CAD):
+     * Best Buy (in Canada), Canadian Tire, Shoppers Drug Mart, Loblaws, Metro, Sobeys
+     * Tim Hortons, Walmart Canada, Costco Canada, Home Depot Canada
+     * Canada Post, LCBO, Beer Store, Petro-Canada, Esso, Shell Canada
+     * Any store with Canadian address (province codes: ON, QC, BC, AB, etc.)
+   - US stores (use USD):
+     * Stores with US state addresses (CA, NY, TX, FL, etc.)
+     * Only when NO Canadian tax indicators present
+   - DEFAULT: If you see any Canadian province or GST/HST/PST, use CAD
 7. Round all amounts to exactly 2 decimal places.
 
 Return a JSON object with these fields:
@@ -407,7 +414,7 @@ Return a JSON object with these fields:
     "vendor": "Complete store/merchant name exactly as shown",
     "date": "YYYY-MM-DD format - use the EXACT year shown on receipt",
     "amount": 0.00,
-    "currency": "CAD/USD/EUR/GBP - detect based on receipt location and indicators",
+    "currency": "CAD if Canadian taxes/address/store, otherwise USD/EUR/GBP",
     "category": "One of: {', '.join(CATEGORIES)}",
     "payment_method": "VISA/Mastercard/Debit/Cash/Interac/etc - look for card type or payment indicators",
     "receipt_number": "Transaction ID, order #, reference #, or receipt # from the receipt",
