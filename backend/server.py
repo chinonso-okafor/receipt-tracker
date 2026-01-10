@@ -290,7 +290,7 @@ async def scan_receipt(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
-    """Scan a receipt image and extract data using Anthropic Vision"""
+    """Scan a receipt image and extract data using Anthropic Vision via Emergent"""
     
     # Read file
     content = await file.read()
@@ -307,26 +307,9 @@ async def scan_receipt(
     # Encode to base64
     image_base64 = base64.b64encode(content).decode("utf-8")
     
-    # Call Anthropic Vision
+    # Call Anthropic Vision via Emergent integrations
     try:
-        message = anthropic_client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": content_type,
-                                "data": image_base64,
-                            },
-                        },
-                        {
-                            "type": "text",
-                            "text": f"""Analyze this receipt image and extract the following information. Return a JSON object with these fields:
+        prompt = f"""Analyze this receipt image and extract the following information. Return a JSON object with these fields:
 
 {{
     "vendor": "Store/merchant name",
@@ -344,14 +327,25 @@ async def scan_receipt(
 
 Be precise with the amount. If you can't read something clearly, make your best guess and lower the confidence score.
 Only return valid JSON, no other text."""
-                        }
-                    ],
-                }
-            ],
+
+        # Create LlmChat instance with Anthropic model
+        chat = LlmChat(
+            api_key=LLM_API_KEY,
+            session_id=f"receipt_scan_{uuid.uuid4().hex[:8]}",
+            system_message="You are a receipt scanning assistant. Extract data from receipt images and return JSON."
+        ).with_model("anthropic", "claude-sonnet-4-20250514")
+        
+        # Create image content
+        image_content = ImageContent(image_base64=image_base64)
+        
+        # Send message with image
+        user_message = UserMessage(
+            text=prompt,
+            image_contents=[image_content]
         )
         
-        # Parse response
-        response_text = message.content[0].text
+        response_text = await chat.send_message(user_message)
+        
         # Clean up response if it has markdown code blocks
         if "```json" in response_text:
             response_text = response_text.split("```json")[1].split("```")[0]
