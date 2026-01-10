@@ -24,15 +24,20 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const CATEGORIES = [
+  "Groceries",
   "Meals & Dining",
   "Travel",
+  "Transportation",
   "Office Supplies",
   "Equipment",
   "Software & Subscriptions",
   "Utilities",
   "Marketing",
   "Professional Services",
-  "Transportation",
+  "Healthcare",
+  "Entertainment",
+  "Shopping",
+  "Shipping & Postage",
   "Other"
 ];
 
