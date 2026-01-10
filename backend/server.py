@@ -294,12 +294,14 @@ async def scan_receipt(
     """Scan a receipt image and extract data using Anthropic Vision"""
     from PIL import Image as PILImage
     import json
+    import fitz  # PyMuPDF for PDF handling
     
     # Read file content
     content = await file.read()
     
-    # Detect actual image type from content (not relying on content_type header)
+    # Detect actual file type from content
     detected_type = "image/jpeg"  # default
+    is_pdf = False
     if content[:8] == b'\x89PNG\r\n\x1a\n':
         detected_type = "image/png"
     elif content[:2] == b'\xff\xd8':
@@ -307,16 +309,39 @@ async def scan_receipt(
     elif content[:4] == b'RIFF' and content[8:12] == b'WEBP':
         detected_type = "image/webp"
     elif content[:4] == b'%PDF':
-        detected_type = "application/pdf"
+        is_pdf = True
     
-    # Convert PDF to image (simplified - just reject for now)
-    if detected_type == "application/pdf":
-        raise HTTPException(status_code=400, detail="PDF files are not yet supported. Please upload an image (JPG, PNG, WEBP).")
+    # Convert PDF to image
+    if is_pdf:
+        try:
+            pdf_document = fitz.open(stream=content, filetype="pdf")
+            if pdf_document.page_count == 0:
+                raise HTTPException(status_code=400, detail="PDF has no pages")
+            
+            # Get first page and render at high resolution
+            page = pdf_document[0]
+            # Render at 2x zoom for better quality
+            mat = fitz.Matrix(2, 2)
+            pix = page.get_pixmap(matrix=mat)
+            
+            # Convert to PIL Image
+            img = PILImage.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            pdf_document.close()
+            
+            logger.info(f"PDF converted to image: {img.width}x{img.height}")
+        except Exception as e:
+            logger.error(f"Error converting PDF: {e}")
+            raise HTTPException(status_code=400, detail=f"Could not process PDF: {str(e)}")
+    else:
+        # Process regular image
+        try:
+            img = PILImage.open(io.BytesIO(content))
+        except Exception as e:
+            logger.error(f"Error opening image: {e}")
+            raise HTTPException(status_code=400, detail=f"Could not process image: {str(e)}")
     
     # Process and compress image - ALWAYS convert to JPEG for consistency
     try:
-        img = PILImage.open(io.BytesIO(content))
-        
         # Convert to RGB (handles RGBA, P, LA, etc.)
         if img.mode != 'RGB':
             img = img.convert('RGB')
@@ -349,25 +374,36 @@ async def scan_receipt(
     
     logger.info(f"Image processed: {len(content)} bytes, type: {detected_type}")
     
+    # Get current date for context
+    current_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    current_year = datetime.now(timezone.utc).year
+    
     # Call Anthropic Vision API directly
     try:
-        prompt = f"""Analyze this receipt image and extract the following information. Return a JSON object with these fields:
+        prompt = f"""You are analyzing a receipt image. Today's date is {current_date}. The current year is {current_year}.
 
+IMPORTANT INSTRUCTIONS:
+1. Extract the COMPLETE vendor name exactly as shown (e.g., "Canada Post / Postes Canada" not just "Postes Canada")
+2. For the date, use the EXACT date shown on the receipt. If the year shown is {current_year}, use {current_year}. Do NOT assume dates are from previous years.
+3. For payment method, look for: "VISA", "MASTERCARD", "MC", "AMEX", "DEBIT", "CASH", "INTERAC", card ending numbers, etc.
+4. The receipt_number is any transaction ID, order number, reference number, or receipt number printed on the receipt.
+5. Extract ALL line items with their prices.
+
+Return a JSON object with these fields:
 {{
-    "vendor": "Store/merchant name",
-    "date": "YYYY-MM-DD format",
+    "vendor": "Complete store/merchant name exactly as shown",
+    "date": "YYYY-MM-DD format - use the EXACT year shown on receipt",
     "amount": 0.00,
-    "currency": "USD",
+    "currency": "USD or CAD based on $ symbol or country",
     "category": "One of: {', '.join(CATEGORIES)}",
-    "payment_method": "Cash/Credit Card/Debit Card/etc or null",
-    "receipt_number": "Receipt/transaction number or null",
+    "payment_method": "VISA/Mastercard/Debit/Cash/Interac/etc - look for card type or payment indicators",
+    "receipt_number": "Transaction ID, order #, reference #, or receipt # from the receipt",
     "line_items": [
         {{"description": "Item name", "quantity": 1, "unit_price": 0.00, "total": 0.00}}
     ],
-    "confidence_score": 0.0 to 1.0 (how confident you are in the extraction)
+    "confidence_score": 0.0 to 1.0
 }}
 
-Be precise with the amount. If you can't read something clearly, make your best guess and lower the confidence score.
 Only return valid JSON, no other text."""
 
         # Determine API endpoint based on key type
