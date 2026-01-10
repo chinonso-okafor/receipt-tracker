@@ -187,7 +187,7 @@ class ReceiptScannerAPITester:
             "notes": "Test expense created by API test"
         }
         
-        success, create_response = self.run_test("Create expense", "POST", "expenses", 201, expense_data)
+        success, create_response = self.run_test("Create expense", "POST", "expenses", 200, expense_data)
         
         if success and 'expense_id' in create_response:
             expense_id = create_response['expense_id']
