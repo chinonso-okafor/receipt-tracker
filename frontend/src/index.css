@@ -115,9 +115,13 @@
 }
 
 /* Mobile bottom nav safe area */
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-    .mobile-nav {
-        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }
 
