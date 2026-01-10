@@ -282,11 +282,11 @@ class ReceiptScannerAPITester:
             "format": "pdf"
         }
         
-        self.run_test("Generate PDF report", "POST", "reports/generate", 200, report_data)
+        self.run_test("Generate PDF report", "POST", "reports/generate", 200, report_data, expect_json=False)
         
         # Test Excel report
         report_data["format"] = "excel"
-        self.run_test("Generate Excel report", "POST", "reports/generate", 200, report_data)
+        self.run_test("Generate Excel report", "POST", "reports/generate", 200, report_data, expect_json=False)
 
     def test_tags_endpoint(self):
         """Test tags endpoint"""
