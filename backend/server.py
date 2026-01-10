@@ -373,10 +373,32 @@ Only return valid JSON, no other text."""
         # Determine API endpoint based on key type
         # Emergent keys start with 'sk-emergent', Anthropic keys start with 'sk-ant'
         if LLM_API_KEY.startswith('sk-emergent'):
-            api_url = "https://ai.emergentmethods.ai/v1/messages"
+            api_url = "https://integrations.emergentagent.com/llm/chat/completions"
             headers = {
                 "Authorization": f"Bearer {LLM_API_KEY}",
                 "content-type": "application/json"
+            }
+            # Use OpenAI-compatible format for Emergent proxy
+            request_body = {
+                "model": "anthropic/claude-sonnet-4-20250514",
+                "max_tokens": 1024,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:{detected_type};base64,{image_base64}"
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
             }
         else:
             api_url = "https://api.anthropic.com/v1/messages"
@@ -385,12 +407,37 @@ Only return valid JSON, no other text."""
                 "anthropic-version": "2023-06-01",
                 "content-type": "application/json"
             }
+            request_body = {
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 1024,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image",
+                                "source": {
+                                    "type": "base64",
+                                    "media_type": detected_type,
+                                    "data": image_base64
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
+            }
         
         # Use direct API call
         async with httpx.AsyncClient(timeout=60.0) as http_client:
             api_response = await http_client.post(
                 api_url,
                 headers=headers,
+                json=request_body
+            )
                 json={
                     "model": "claude-sonnet-4-20250514",
                     "max_tokens": 1024,
