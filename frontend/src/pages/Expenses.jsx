@@ -168,11 +168,35 @@ const Expenses = () => {
     setEndDate(null);
   };
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount, currency = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount);
+  };
+
+  // Get category icon/color
+  const getCategoryStyle = (category) => {
+    const styles = {
+      "Groceries": "bg-green-100 text-green-700",
+      "Meals & Dining": "bg-orange-100 text-orange-700",
+      "Travel": "bg-blue-100 text-blue-700",
+      "Transportation": "bg-purple-100 text-purple-700",
+      "Office Supplies": "bg-gray-100 text-gray-700",
+      "Equipment": "bg-slate-100 text-slate-700",
+      "Software & Subscriptions": "bg-indigo-100 text-indigo-700",
+      "Utilities": "bg-yellow-100 text-yellow-700",
+      "Marketing": "bg-pink-100 text-pink-700",
+      "Professional Services": "bg-cyan-100 text-cyan-700",
+      "Healthcare": "bg-red-100 text-red-700",
+      "Entertainment": "bg-violet-100 text-violet-700",
+      "Shopping": "bg-rose-100 text-rose-700",
+      "Shipping & Postage": "bg-amber-100 text-amber-700",
+      "Other": "bg-muted text-muted-foreground",
+    };
+    return styles[category] || styles["Other"];
   };
 
   const hasFilters = search || category || startDate || endDate;
