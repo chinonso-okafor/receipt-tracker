@@ -380,7 +380,7 @@ Only return valid JSON, no other text."""
             }
             # Use OpenAI-compatible format for Emergent proxy
             request_body = {
-                "model": "anthropic/claude-sonnet-4-20250514",
+                "model": "claude-sonnet-4-20250514",
                 "max_tokens": 1024,
                 "messages": [
                     {
