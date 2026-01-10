@@ -11,7 +11,6 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import base64
-import anthropic
 import io
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
@@ -20,6 +19,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import xlsxwriter
 import httpx
+from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -29,8 +29,8 @@ mongo_url = os.environ.get('MONGO_URL')
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME')]
 
-# Anthropic client
-anthropic_client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', ''))
+# LLM API Key - Use Emergent key or fallback to Anthropic key
+LLM_API_KEY = os.environ.get('EMERGENT_LLM_KEY') or os.environ.get('ANTHROPIC_API_KEY', '')
 
 # Create the main app without a prefix
 app = FastAPI()
