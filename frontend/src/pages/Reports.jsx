@@ -179,7 +179,12 @@ const Reports = () => {
                         <Calendar
                           mode="single"
                           selected={startDate}
-                          onSelect={(date) => date && setStartDate(date)}
+                          onSelect={(date) => {
+                            if (date) {
+                              setStartDate(date);
+                              setSelectedPreset(null); // Clear preset when custom date selected
+                            }
+                          }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -192,10 +197,10 @@ const Reports = () => {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start text-left h-12 rounded-xl"
+                          className="w-full justify-start text-left h-12 rounded-xl border-2 border-primary/20 bg-primary/5"
                           data-testid="report-end-date"
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                           {format(endDate, "MMM d, yyyy")}
                         </Button>
                       </PopoverTrigger>
@@ -203,7 +208,12 @@ const Reports = () => {
                         <Calendar
                           mode="single"
                           selected={endDate}
-                          onSelect={(date) => date && setEndDate(date)}
+                          onSelect={(date) => {
+                            if (date) {
+                              setEndDate(date);
+                              setSelectedPreset(null); // Clear preset when custom date selected
+                            }
+                          }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -219,6 +229,11 @@ const Reports = () => {
                 <CardTitle className="text-lg">Categories</CardTitle>
                 <CardDescription>
                   Filter by specific categories (leave empty for all)
+                  {selectedCategories.length > 0 && (
+                    <span className="ml-2 text-primary font-medium">
+                      ({selectedCategories.length} selected)
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -226,7 +241,12 @@ const Reports = () => {
                   {CATEGORIES.map((category) => (
                     <div
                       key={category}
-                      className="flex items-center space-x-2"
+                      onClick={() => toggleCategory(category)}
+                      className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-all ${
+                        selectedCategories.includes(category)
+                          ? "bg-primary/10 border-2 border-primary"
+                          : "hover:bg-muted border-2 border-transparent"
+                      }`}
                     >
                       <Checkbox
                         id={category}
