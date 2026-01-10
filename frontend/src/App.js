@@ -5,6 +5,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Expenses from "@/pages/Expenses";
 import Reports from "@/pages/Reports";
+import Admin from "@/pages/Admin";
 import "@/App.css";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
