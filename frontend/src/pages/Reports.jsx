@@ -144,12 +144,17 @@ const Reports = () => {
                   {DATE_PRESETS.map((preset) => (
                     <Button
                       key={preset.label}
-                      variant="outline"
+                      variant={selectedPreset === preset.label ? "default" : "outline"}
                       size="sm"
                       onClick={() => handlePresetClick(preset)}
-                      className="rounded-full"
+                      className={`rounded-full transition-all ${
+                        selectedPreset === preset.label 
+                          ? "bg-primary text-primary-foreground shadow-md" 
+                          : "hover:bg-primary/10"
+                      }`}
                       data-testid={`preset-${preset.label.toLowerCase().replace(/\s/g, '-')}`}
                     >
+                      {selectedPreset === preset.label && <Check className="h-3 w-3 mr-1" />}
                       {preset.label}
                     </Button>
                   ))}
@@ -163,10 +168,10 @@ const Reports = () => {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start text-left h-12 rounded-xl"
+                          className="w-full justify-start text-left h-12 rounded-xl border-2 border-primary/20 bg-primary/5"
                           data-testid="report-start-date"
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
                           {format(startDate, "MMM d, yyyy")}
                         </Button>
                       </PopoverTrigger>
