@@ -236,12 +236,12 @@ const Expenses = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
                         <label className="text-sm font-medium mb-2 block">Category</label>
-                        <Select value={category} onValueChange={setCategory}>
+                        <Select value={category} onValueChange={(val) => setCategory(val === "all" ? "" : val)}>
                           <SelectTrigger data-testid="category-filter" className="h-10 rounded-lg">
                             <SelectValue placeholder="All categories" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All categories</SelectItem>
+                            <SelectItem value="all">All categories</SelectItem>
                             {CATEGORIES.map((cat) => (
                               <SelectItem key={cat} value={cat}>
                                 {cat}
