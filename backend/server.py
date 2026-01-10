@@ -947,6 +947,65 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+# ============== ADMIN - USER TRACKING ==============
+
+@api_router.get("/admin/users")
+async def get_all_users(current_user: User = Depends(get_current_user)):
+    """Get all users and their stats - Admin endpoint"""
+    # Get all users
+    users = await db.users.find({}, {"_id": 0}).to_list(1000)
+    
+    # Enrich with expense stats
+    users_with_stats = []
+    for user in users:
+        # Get expense count and total for this user
+        expenses = await db.expenses.find(
+            {"user_id": user["user_id"]},
+            {"_id": 0, "amount": 1, "currency": 1}
+        ).to_list(10000)
+        
+        total_amount = sum(e.get("amount", 0) for e in expenses)
+        expense_count = len(expenses)
+        
+        users_with_stats.append({
+            "user_id": user["user_id"],
+            "email": user["email"],
+            "name": user["name"],
+            "picture": user.get("picture"),
+            "created_at": user.get("created_at"),
+            "expense_count": expense_count,
+            "total_expenses": round(total_amount, 2)
+        })
+    
+    return {
+        "total_users": len(users_with_stats),
+        "users": users_with_stats
+    }
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(current_user: User = Depends(get_current_user)):
+    """Get overall platform stats - Admin endpoint"""
+    # Count users
+    user_count = await db.users.count_documents({})
+    
+    # Count total expenses across all users
+    expense_count = await db.expenses.count_documents({})
+    
+    # Get total amount
+    all_expenses = await db.expenses.find({}, {"_id": 0, "amount": 1}).to_list(100000)
+    total_amount = sum(e.get("amount", 0) for e in all_expenses)
+    
+    # Get recent activity (last 7 days)
+    seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y-%m-%d")
+    recent_expenses = await db.expenses.count_documents({"date": {"$gte": seven_days_ago}})
+    
+    return {
+        "total_users": user_count,
+        "total_expenses": expense_count,
+        "total_amount": round(total_amount, 2),
+        "expenses_last_7_days": recent_expenses
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
