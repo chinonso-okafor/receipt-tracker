@@ -473,13 +473,11 @@ const Expenses = () => {
                         {/* Amount */}
                         <div className="col-span-6 md:col-span-2 text-right">
                           <span className="font-semibold text-foreground text-lg">
-                            {formatCurrency(expense.amount)}
+                            {formatCurrency(expense.amount, expense.currency || "USD")}
                           </span>
-                          {expense.confidence_score && (
-                            <p className="text-xs text-muted-foreground">
-                              {(expense.confidence_score * 100).toFixed(0)}% confident
-                            </p>
-                          )}
+                          <p className="text-xs text-muted-foreground">
+                            {expense.currency || "USD"}
+                          </p>
                         </div>
 
                         {/* Actions */}
