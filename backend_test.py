@@ -82,16 +82,31 @@ class ReceiptScannerAPITester:
             return False, {}
 
     def create_test_image(self):
-        """Create a simple test receipt image"""
-        # Create a simple receipt-like image
+        """Create a realistic test receipt image"""
+        # Create a receipt-like image with text
         img = Image.new('RGB', (400, 600), color='white')
+        draw = ImageDraw.Draw(img)
         
-        # Convert to base64
-        buffer = io.BytesIO()
-        img.save(buffer, format='JPEG')
-        img_data = buffer.getvalue()
+        try:
+            font = ImageFont.load_default()
+        except:
+            font = None
         
-        return base64.b64encode(img_data).decode('utf-8')
+        # Draw receipt content
+        y_pos = 20
+        draw.text((50, y_pos), 'TEST STORE RECEIPT', fill='black', font=font)
+        y_pos += 40
+        draw.text((50, y_pos), 'Date: 2024-01-15', fill='black', font=font)
+        y_pos += 25
+        draw.text((50, y_pos), 'Receipt #: 12345', fill='black', font=font)
+        y_pos += 40
+        draw.text((50, y_pos), 'Coffee         $4.50', fill='black', font=font)
+        y_pos += 25
+        draw.text((50, y_pos), 'Tax            $0.36', fill='black', font=font)
+        y_pos += 40
+        draw.text((50, y_pos), 'TOTAL:         $4.86', fill='black', font=font)
+        
+        return img
 
     def test_health_endpoints(self):
         """Test basic health check endpoints"""
