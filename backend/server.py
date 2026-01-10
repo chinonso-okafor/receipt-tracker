@@ -290,8 +290,9 @@ async def scan_receipt(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
-    """Scan a receipt image and extract data using Anthropic Vision via Emergent"""
+    """Scan a receipt image and extract data using Anthropic Vision"""
     from PIL import Image as PILImage
+    import json
     
     # Read file content
     content = await file.read()
@@ -311,38 +312,32 @@ async def scan_receipt(
     if detected_type == "application/pdf":
         raise HTTPException(status_code=400, detail="PDF files are not yet supported. Please upload an image (JPG, PNG, WEBP).")
     
-    # Process and compress image if needed
+    # Process and compress image - ALWAYS convert to JPEG for consistency
     try:
         img = PILImage.open(io.BytesIO(content))
         
-        # Convert to RGB if necessary (handles RGBA, etc.)
-        if img.mode in ('RGBA', 'P', 'LA'):
+        # Convert to RGB (handles RGBA, P, LA, etc.)
+        if img.mode != 'RGB':
             img = img.convert('RGB')
-            detected_type = "image/jpeg"
         
-        # Resize if too large (max dimension 2000px to keep under 5MB limit)
-        max_dimension = 2000
+        # Resize if too large (max dimension 1500px to keep well under 5MB limit)
+        max_dimension = 1500
         if img.width > max_dimension or img.height > max_dimension:
             ratio = min(max_dimension / img.width, max_dimension / img.height)
             new_size = (int(img.width * ratio), int(img.height * ratio))
             img = img.resize(new_size, PILImage.Resampling.LANCZOS)
         
-        # Save to buffer with compression
+        # Always save as JPEG for consistency
         buffer = io.BytesIO()
-        if detected_type == "image/png":
-            img.save(buffer, format='PNG', optimize=True)
-        else:
-            img.save(buffer, format='JPEG', quality=85, optimize=True)
-            detected_type = "image/jpeg"
-        
+        img.save(buffer, format='JPEG', quality=85, optimize=True)
         content = buffer.getvalue()
+        detected_type = "image/jpeg"
         
         # If still too large, reduce quality further
-        if len(content) > 4 * 1024 * 1024:  # 4MB
+        if len(content) > 3 * 1024 * 1024:  # 3MB
             buffer = io.BytesIO()
-            img.save(buffer, format='JPEG', quality=60, optimize=True)
+            img.save(buffer, format='JPEG', quality=50, optimize=True)
             content = buffer.getvalue()
-            detected_type = "image/jpeg"
             
     except Exception as e:
         logger.error(f"Error processing image: {e}")
@@ -351,7 +346,9 @@ async def scan_receipt(
     # Encode to base64
     image_base64 = base64.b64encode(content).decode("utf-8")
     
-    # Call Anthropic Vision via Emergent integrations
+    logger.info(f"Image processed: {len(content)} bytes, type: {detected_type}")
+    
+    # Call Anthropic Vision API directly
     try:
         prompt = f"""Analyze this receipt image and extract the following information. Return a JSON object with these fields:
 
@@ -372,23 +369,47 @@ async def scan_receipt(
 Be precise with the amount. If you can't read something clearly, make your best guess and lower the confidence score.
 Only return valid JSON, no other text."""
 
-        # Create LlmChat instance with Anthropic model
-        chat = LlmChat(
-            api_key=LLM_API_KEY,
-            session_id=f"receipt_scan_{uuid.uuid4().hex[:8]}",
-            system_message="You are a receipt scanning assistant. Extract data from receipt images and return JSON."
-        ).with_model("anthropic", "claude-sonnet-4-20250514")
+        # Use direct API call to Anthropic
+        async with httpx.AsyncClient(timeout=60.0) as http_client:
+            api_response = await http_client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": LLM_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                },
+                json={
+                    "model": "claude-sonnet-4-20250514",
+                    "max_tokens": 1024,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": detected_type,
+                                        "data": image_base64
+                                    }
+                                },
+                                {
+                                    "type": "text",
+                                    "text": prompt
+                                }
+                            ]
+                        }
+                    ]
+                }
+            )
         
-        # Create image content with detected media type
-        image_content = ImageContent(image_base64=image_base64)
+        if api_response.status_code != 200:
+            error_detail = api_response.json() if api_response.headers.get("content-type", "").startswith("application/json") else api_response.text
+            logger.error(f"Anthropic API error: {error_detail}")
+            raise HTTPException(status_code=500, detail=f"AI service error: {api_response.status_code}")
         
-        # Send message with image
-        user_message = UserMessage(
-            text=prompt,
-            file_contents=[image_content]
-        )
-        
-        response_text = await chat.send_message(user_message)
+        response_data = api_response.json()
+        response_text = response_data["content"][0]["text"]
         
         # Clean up response if it has markdown code blocks
         if "```json" in response_text:
@@ -396,7 +417,6 @@ Only return valid JSON, no other text."""
         elif "```" in response_text:
             response_text = response_text.split("```")[1].split("```")[0]
         
-        import json
         result = json.loads(response_text.strip())
         
         return ReceiptScanResult(
@@ -411,6 +431,11 @@ Only return valid JSON, no other text."""
             confidence_score=float(result.get("confidence_score", 0.5))
         )
         
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to parse AI response")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error scanning receipt: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to scan receipt: {str(e)}")
