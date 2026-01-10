@@ -142,8 +142,8 @@ class ReceiptScannerAPITester:
         print("\n🔍 Using Test Session...")
         
         # Use the session token created in MongoDB
-        self.session_token = "test_session_1768030049723"
-        self.user_id = "test-user-1768030049723"
+        self.session_token = "test_session_1768032078575"
+        self.user_id = "test-user-1768032078575"
         
         try:
             print(f"Using test session token: {self.session_token}")
