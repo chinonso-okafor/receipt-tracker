@@ -424,21 +424,15 @@ const Expenses = () => {
                   >
                     <CardContent className="p-4">
                       <div className="grid grid-cols-12 gap-4 items-center">
-                        {/* Checkbox */}
+                        {/* Checkbox and Icon */}
                         <div className="col-span-2 md:col-span-1 flex items-center gap-3">
                           <Checkbox
                             checked={selectedExpenses.includes(expense.expense_id)}
                             onCheckedChange={() => toggleSelect(expense.expense_id)}
                           />
-                          {expense.receipt_image && (
-                            <div className="h-10 w-10 rounded-lg bg-muted overflow-hidden hidden sm:block">
-                              <img
-                                src={expense.receipt_image}
-                                alt="Receipt"
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                          )}
+                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center hidden sm:flex ${getCategoryStyle(expense.category)}`}>
+                            <Receipt className="h-5 w-5" />
+                          </div>
                         </div>
 
                         {/* Vendor */}
@@ -465,7 +459,7 @@ const Expenses = () => {
                         <div className="col-span-6 md:col-span-2">
                           <Badge
                             variant="outline"
-                            className="bg-secondary/50 border-0"
+                            className={`border-0 ${getCategoryStyle(expense.category)}`}
                           >
                             {expense.category}
                           </Badge>
