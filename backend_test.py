@@ -223,15 +223,17 @@ class ReceiptScannerAPITester:
             print("⚠️  Skipping receipt scanning tests - no valid session token")
             return
         
-        # Note: This test will likely fail without a valid Anthropic API key
-        # or with our simple test image, but we can test the endpoint structure
-        
         try:
-            # Create a simple test image
-            test_image = self.create_test_image()
+            # Create a simple test image as PNG (not JPEG to avoid format issues)
+            img = Image.new('RGB', (400, 600), color='white')
+            
+            # Convert to base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_data = buffer.getvalue()
             
             # Test upload receipt image endpoint
-            files = {'file': ('test_receipt.jpg', base64.b64decode(test_image), 'image/jpeg')}
+            files = {'file': ('test_receipt.png', img_data, 'image/png')}
             
             url = f"{self.base_url}/upload-receipt-image"
             headers = {'Authorization': f'Bearer {self.session_token}'}
@@ -243,13 +245,21 @@ class ReceiptScannerAPITester:
             else:
                 self.log_test("Upload receipt image", False, f"Status: {response.status_code}")
             
-            # Test scan receipt endpoint (this will likely fail with our simple image)
-            response = requests.post(f"{self.base_url}/scan-receipt", files=files, headers=headers, timeout=30)
+            # Test scan receipt endpoint
+            response = requests.post(f"{self.base_url}/scan-receipt", files=files, headers=headers, timeout=60)
             
-            if response.status_code in [200, 500]:  # 500 is expected with invalid image/API key
-                self.log_test("Scan receipt endpoint accessible", True)
+            if response.status_code == 200:
+                self.log_test("Scan receipt endpoint", True)
+                try:
+                    result = response.json()
+                    if 'vendor' in result and 'amount' in result:
+                        self.log_test("Receipt data extraction", True)
+                    else:
+                        self.log_test("Receipt data extraction", False, "Missing expected fields")
+                except:
+                    self.log_test("Receipt data extraction", False, "Invalid JSON response")
             else:
-                self.log_test("Scan receipt endpoint accessible", False, f"Status: {response.status_code}")
+                self.log_test("Scan receipt endpoint", False, f"Status: {response.status_code}")
                 
         except Exception as e:
             self.log_test("Receipt scanning tests", False, f"Exception: {str(e)}")
