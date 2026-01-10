@@ -149,9 +149,18 @@ const UploadModal = ({ open, onClose, onSuccess }) => {
       clearInterval(progressInterval);
       setProgress(100);
 
+      // Clone the response before reading to avoid "body already consumed" error
+      const responseClone = response.clone();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to scan receipt");
+        let errorMessage = "Failed to scan receipt";
+        try {
+          const errorData = await responseClone.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default message
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
