@@ -135,7 +135,10 @@ const Layout = ({ children }) => {
 
       {/* Mobile Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-xl border-b border-border z-50 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div 
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => navigate("/dashboard")}
+        >
           <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
             <Receipt className="h-5 w-5 text-primary-foreground" />
           </div>
