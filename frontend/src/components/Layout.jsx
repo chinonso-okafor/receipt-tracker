@@ -63,8 +63,12 @@ const Layout = ({ children }) => {
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border h-screen fixed left-0 top-0 z-40 p-6">
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-8">
+        {/* Logo - Clickable to go home */}
+        <div 
+          className="flex items-center gap-3 mb-8 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate("/dashboard")}
+          data-testid="logo-home-link"
+        >
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
             <Receipt className="h-5 w-5 text-primary-foreground" />
           </div>
