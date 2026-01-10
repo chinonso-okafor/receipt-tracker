@@ -60,11 +60,13 @@ const Reports = () => {
   const [includeImages, setIncludeImages] = useState(false);
   const [reportFormat, setReportFormat] = useState("pdf");
   const [generating, setGenerating] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState("Last 30 days");
 
   const handlePresetClick = (preset) => {
     const { start, end } = preset.getValue();
     setStartDate(start);
     setEndDate(end);
+    setSelectedPreset(preset.label);
   };
 
   const toggleCategory = (category) => {
