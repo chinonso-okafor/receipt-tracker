@@ -99,6 +99,21 @@ const Layout = ({ children }) => {
               </Button>
             );
           })}
+          
+          {/* Admin Link */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <Button
+              variant={location.pathname === "/admin" ? "secondary" : "ghost"}
+              className={`w-full justify-start h-12 rounded-xl transition-all ${
+                location.pathname === "/admin" ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => navigate("/admin")}
+              data-testid="nav-admin"
+            >
+              <adminItem.icon className="h-5 w-5 mr-3" />
+              {adminItem.label}
+            </Button>
+          </div>
         </nav>
 
         {/* User Profile */}
