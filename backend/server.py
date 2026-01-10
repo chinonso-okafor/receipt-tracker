@@ -291,18 +291,62 @@ async def scan_receipt(
     current_user: User = Depends(get_current_user)
 ):
     """Scan a receipt image and extract data using Anthropic Vision via Emergent"""
+    from PIL import Image as PILImage
     
-    # Read file
+    # Read file content
     content = await file.read()
     
-    # Determine media type
-    content_type = file.content_type or "image/jpeg"
-    if content_type not in ["image/jpeg", "image/png", "image/webp", "application/pdf"]:
-        raise HTTPException(status_code=400, detail="Unsupported file type. Use JPG, PNG, WEBP, or PDF")
+    # Detect actual image type from content (not relying on content_type header)
+    detected_type = "image/jpeg"  # default
+    if content[:8] == b'\x89PNG\r\n\x1a\n':
+        detected_type = "image/png"
+    elif content[:2] == b'\xff\xd8':
+        detected_type = "image/jpeg"
+    elif content[:4] == b'RIFF' and content[8:12] == b'WEBP':
+        detected_type = "image/webp"
+    elif content[:4] == b'%PDF':
+        detected_type = "application/pdf"
     
-    # For PDF, we'll just use the first page as an image (simplified)
-    if content_type == "application/pdf":
-        content_type = "image/png"
+    # Convert PDF to image (simplified - just reject for now)
+    if detected_type == "application/pdf":
+        raise HTTPException(status_code=400, detail="PDF files are not yet supported. Please upload an image (JPG, PNG, WEBP).")
+    
+    # Process and compress image if needed
+    try:
+        img = PILImage.open(io.BytesIO(content))
+        
+        # Convert to RGB if necessary (handles RGBA, etc.)
+        if img.mode in ('RGBA', 'P', 'LA'):
+            img = img.convert('RGB')
+            detected_type = "image/jpeg"
+        
+        # Resize if too large (max dimension 2000px to keep under 5MB limit)
+        max_dimension = 2000
+        if img.width > max_dimension or img.height > max_dimension:
+            ratio = min(max_dimension / img.width, max_dimension / img.height)
+            new_size = (int(img.width * ratio), int(img.height * ratio))
+            img = img.resize(new_size, PILImage.Resampling.LANCZOS)
+        
+        # Save to buffer with compression
+        buffer = io.BytesIO()
+        if detected_type == "image/png":
+            img.save(buffer, format='PNG', optimize=True)
+        else:
+            img.save(buffer, format='JPEG', quality=85, optimize=True)
+            detected_type = "image/jpeg"
+        
+        content = buffer.getvalue()
+        
+        # If still too large, reduce quality further
+        if len(content) > 4 * 1024 * 1024:  # 4MB
+            buffer = io.BytesIO()
+            img.save(buffer, format='JPEG', quality=60, optimize=True)
+            content = buffer.getvalue()
+            detected_type = "image/jpeg"
+            
+    except Exception as e:
+        logger.error(f"Error processing image: {e}")
+        raise HTTPException(status_code=400, detail=f"Could not process image: {str(e)}")
     
     # Encode to base64
     image_base64 = base64.b64encode(content).decode("utf-8")
@@ -335,7 +379,7 @@ Only return valid JSON, no other text."""
             system_message="You are a receipt scanning assistant. Extract data from receipt images and return JSON."
         ).with_model("anthropic", "claude-sonnet-4-20250514")
         
-        # Create image content
+        # Create image content with detected media type
         image_content = ImageContent(image_base64=image_base64)
         
         # Send message with image
