@@ -251,7 +251,7 @@ const Layout = ({ children }) => {
       </nav>
 
       {/* Main Content */}
-      <main className="md:ml-64 pt-16 md:pt-0 pb-24 md:pb-0 min-h-screen">
+      <main className="md:ml-64 pt-16 md:pt-0 pb-20 md:pb-0 min-h-screen">
         {children}
       </main>
     </div>
