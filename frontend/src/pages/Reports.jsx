@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, FileSpreadsheet, Download, CalendarIcon, Loader2 } from "lucide-react";
+import { FileText, FileSpreadsheet, Download, CalendarIcon, Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { format, subDays, subMonths, startOfMonth, endOfMonth } from "date-fns";
@@ -23,15 +23,20 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const CATEGORIES = [
+  "Groceries",
   "Meals & Dining",
   "Travel",
+  "Transportation",
   "Office Supplies",
   "Equipment",
   "Software & Subscriptions",
   "Utilities",
   "Marketing",
   "Professional Services",
-  "Transportation",
+  "Healthcare",
+  "Entertainment",
+  "Shopping",
+  "Shipping & Postage",
   "Other"
 ];
 
