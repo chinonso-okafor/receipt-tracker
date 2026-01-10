@@ -1,0 +1,188 @@
+{
+  "identity": {
+    "persona": "E1 - The Anti-AI Designer",
+    "mission": "Create a receipt tracking app that feels like a high-end financial tool mixed with a botanical journal. Trustworthy but organic.",
+    "principles": [
+      "Fusion over Imitation: Finance x Botany",
+      "Emotion First: Calm confidence",
+      "Content is King: Data is beautiful",
+      "Zoom In: Focus on receipt details",
+      "Negative Space: Breathable lists"
+    ]
+  },
+  "design_system": {
+    "colors": {
+      "palette_name": "Organic Ledger",
+      "base": {
+        "background": "#F9F9F7",
+        "foreground": "#1A1C1B",
+        "card": "#FFFFFF",
+        "card_foreground": "#1A1C1B"
+      },
+      "primary": {
+        "default": "#1A3C34",
+        "foreground": "#FFFFFF",
+        "description": "Deep Forest Green - Used for primary actions, active states, and branding."
+      },
+      "secondary": {
+        "default": "#E8EBE9",
+        "foreground": "#1A3C34",
+        "description": "Pale Sage - Used for secondary buttons and backgrounds."
+      },
+      "accent": {
+        "default": "#D4E09B",
+        "foreground": "#1A3C34",
+        "description": "Acid Lime - The 'E1 Twist'. Used for the Scan/Upload FAB and high-priority highlights."
+      },
+      "destructive": {
+        "default": "#E07A5F",
+        "foreground": "#FFFFFF",
+        "description": "Terracotta - Used for errors, delete actions, and negative values."
+      },
+      "muted": {
+        "default": "#F0F0F0",
+        "foreground": "#6B7280"
+      },
+      "border": "#E5E7EB",
+      "input": "#E5E7EB",
+      "ring": "#1A3C34"
+    },
+    "typography": {
+      "headings": {
+        "family": "Manrope, sans-serif",
+        "weights": ["600", "800"],
+        "tracking": "-0.02em",
+        "usage": "All page titles, section headers, and major metrics."
+      },
+      "body": {
+        "family": "IBM Plex Sans, sans-serif",
+        "weights": ["400", "500"],
+        "usage": "General text, table data, form labels."
+      },
+      "mono": {
+        "family": "JetBrains Mono, monospace",
+        "usage": "Receipt numbers, transaction IDs, raw data."
+      }
+    },
+    "spacing": {
+      "scale": "Generous. Use p-6 or p-8 where p-4 is standard.",
+      "container_padding": "px-4 md:px-8 lg:px-12",
+      "section_gap": "gap-8 md:gap-12"
+    },
+    "shadows": {
+      "card": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "floating": "0 10px 15px -3px rgba(26, 60, 52, 0.1), 0 4px 6px -2px rgba(26, 60, 52, 0.05)",
+      "glow": "0 0 15px rgba(212, 224, 155, 0.5)"
+    },
+    "radius": {
+      "default": "0.75rem",
+      "button": "9999px",
+      "card": "1rem"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_hero": {
+        "url": "https://images.unsplash.com/photo-1537655949728-d4e1c7c7bf90?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHw0fHxtaW5pbWFsaXN0JTIwb2ZmaWNlJTIwZGVzayUyMHRvcCUyMHZpZXd8ZW58MHx8fHwxNzY4MDI5MjMzfDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Minimalist office desk with silver MacBook",
+        "usage": "Login page side panel or background"
+      },
+      "texture_overlay": {
+        "url": "https://images.unsplash.com/photo-1603484477859-abe6a73f9366?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHBhcGVyJTIwbGF5ZXJzJTIwd2hpdGUlMjB0ZXh0dXJlfGVufDB8fHx8MTc2ODAyOTIzNXww&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract paper layers texture",
+        "usage": "Subtle background overlay for the dashboard to give it a 'physical' feel"
+      },
+      "user_avatar": {
+        "url": "https://images.unsplash.com/photo-1758876017903-89981565c00b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMGNyZWF0aXZlJTIwcGVyc29ufGVufDB8fHx8MTc2ODAyOTIzNnww&ixlib=rb-4.1.0&q=85",
+        "alt": "Creative professional woman",
+        "usage": "User profile avatar"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px for elegance, 2px for active states."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 rounded-full px-8 py-6 text-lg font-semibold",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full px-6 py-4 font-medium",
+      "ghost": "hover:bg-muted text-foreground rounded-lg px-4 py-2",
+      "fab": "fixed bottom-8 right-8 h-16 w-16 rounded-full bg-accent text-accent-foreground shadow-floating hover:scale-110 transition-transform duration-200 flex items-center justify-center z-50"
+    },
+    "cards": {
+      "dashboard": "bg-card border border-border/50 shadow-card rounded-2xl p-6 hover:shadow-md transition-shadow duration-300",
+      "receipt": "bg-white border border-border shadow-sm rounded-xl overflow-hidden hover:border-primary/50 transition-colors duration-200 group relative"
+    },
+    "inputs": {
+      "default": "bg-background border-border focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg h-12 px-4 transition-all duration-200"
+    },
+    "navigation": {
+      "sidebar": "hidden md:flex flex-col w-64 bg-card border-r border-border h-screen p-6 fixed left-0 top-0 z-40",
+      "mobile_nav": "md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-xl border-t border-border flex justify-around items-center z-50 px-4 pb-2"
+    }
+  },
+  "layout_strategies": {
+    "dashboard_grid": {
+      "type": "Control Room Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-4 gap-6 p-6 md:p-8",
+      "areas": {
+        "summary": "col-span-1 md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4",
+        "main_chart": "col-span-1 md:col-span-3 row-span-2 min-h-[400px]",
+        "recent_list": "col-span-1 md:col-span-1 row-span-2 h-full"
+      }
+    },
+    "receipt_gallery": {
+      "type": "Tetris Grid",
+      "classes": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6"
+    }
+  },
+  "pages": {
+    "login": {
+      "layout": "Split screen. Left: 40% Image (Login Hero). Right: 60% Form.",
+      "vibe": "Calm, secure, welcoming.",
+      "elements": [
+        "Logo: Large, serif font.",
+        "Form: Centered, minimal fields.",
+        "Quote: 'Financial clarity for the creative mind' (italic, muted)."
+      ]
+    },
+    "dashboard": {
+      "layout": "Sidebar (desktop) / Bottom Nav (mobile) + Main Content Area.",
+      "header": "Welcome back, [Name]. Date in mono font.",
+      "widgets": [
+        "Total Spend (Big Number)",
+        "Monthly Budget (Progress Bar)",
+        "Recent Uploads (Horizontal Scroll)",
+        "Spending Trends (Area Chart - Green gradient)"
+      ]
+    },
+    "upload_modal": {
+      "style": "Glassmorphism overlay.",
+      "animation": "Slide up from bottom.",
+      "content": "Drag & Drop zone with dashed border (Terracotta color on hover). Camera option for mobile."
+    }
+  },
+  "universal_guidelines": {
+    "anti_ai_rules": [
+      "Do NOT use generic blue gradients.",
+      "Do NOT use 'Inter' font for headings.",
+      "Do NOT center text by default.",
+      "Use noise/grain texture on the background to kill digital flatness.",
+      "Use 'sonner' for all notifications.",
+      "Ensure all interactive elements have data-testid attributes."
+    ],
+    "accessibility": {
+      "contrast": "Ensure text is readable on the off-white background.",
+      "focus": "Visible focus rings on all inputs."
+    },
+    "motion": {
+      "library": "framer-motion",
+      "defaults": {
+        "duration": 0.3,
+        "ease": "easeOut"
+      }
+    }
+  },
+  "instructions_to_main_agent": "You are building the frontend. Use the provided colors and fonts. Implement the 'Organic Ledger' theme. Use Shadcn components but override their styles with the classes defined in 'components'. Focus on the 'Control Room' grid for the dashboard. Use the provided image URLs for the login page and user avatar."
+}
