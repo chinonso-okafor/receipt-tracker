@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 import base64
 import io
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 class ReceiptScannerAPITester:
     def __init__(self, base_url="https://receiptscanner-3.preview.emergentagent.com/api"):
