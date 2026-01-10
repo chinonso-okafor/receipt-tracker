@@ -341,7 +341,7 @@ Only return valid JSON, no other text."""
         # Send message with image
         user_message = UserMessage(
             text=prompt,
-            images=[image_content]
+            file_contents=[image_content]
         )
         
         response_text = await chat.send_message(user_message)
