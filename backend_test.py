@@ -239,12 +239,12 @@ class ReceiptScannerAPITester:
             return
         
         try:
-            # Create a simple test image as PNG (not JPEG to avoid format issues)
-            img = Image.new('RGB', (400, 600), color='white')
+            # Create a realistic test image as PNG
+            test_img = self.create_test_image()
             
-            # Convert to base64
+            # Convert to bytes
             buffer = io.BytesIO()
-            img.save(buffer, format='PNG')
+            test_img.save(buffer, format='PNG')
             img_data = buffer.getvalue()
             
             # Test upload receipt image endpoint
