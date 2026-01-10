@@ -393,13 +393,21 @@ IMPORTANT INSTRUCTIONS:
 3. For payment method, look for: "VISA", "MASTERCARD", "MC", "AMEX", "DEBIT", "CASH", "INTERAC", card ending numbers, etc.
 4. The receipt_number is any transaction ID, order number, reference number, or receipt number printed on the receipt.
 5. Extract ALL line items with their prices.
+6. CURRENCY DETECTION - Detect the currency based on:
+   - Explicit currency symbols or codes on receipt (CAD, USD, EUR, GBP, $, €, £)
+   - Vendor location (Canadian stores = CAD, US stores = USD, etc.)
+   - Common Canadian retailers: Tim Hortons, Canadian Tire, Shoppers Drug Mart, Loblaws, Metro, Sobeys = CAD
+   - Common US retailers: Walmart US, Target, Best Buy US, Costco US = USD
+   - If receipt shows "GST/HST" or "PST" = Canadian (CAD)
+   - If receipt shows only "Sales Tax" = likely US (USD)
+7. Round all amounts to exactly 2 decimal places.
 
 Return a JSON object with these fields:
 {{
     "vendor": "Complete store/merchant name exactly as shown",
     "date": "YYYY-MM-DD format - use the EXACT year shown on receipt",
     "amount": 0.00,
-    "currency": "USD or CAD based on $ symbol or country",
+    "currency": "CAD/USD/EUR/GBP - detect based on receipt location and indicators",
     "category": "One of: {', '.join(CATEGORIES)}",
     "payment_method": "VISA/Mastercard/Debit/Cash/Interac/etc - look for card type or payment indicators",
     "receipt_number": "Transaction ID, order #, reference #, or receipt # from the receipt",
