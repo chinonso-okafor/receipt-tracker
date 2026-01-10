@@ -114,25 +114,21 @@ class ReceiptScannerAPITester:
 
     def create_test_session(self):
         """Create a test user and session for authenticated endpoints"""
-        print("\n🔍 Creating Test Session...")
+        print("\n🔍 Using Test Session...")
         
-        # Generate test data
-        timestamp = int(datetime.now().timestamp())
-        self.user_id = f"test_user_{timestamp}"
-        email = f"test.user.{timestamp}@example.com"
-        self.session_token = f"test_session_{timestamp}"
+        # Use the session token created in MongoDB
+        self.session_token = "test_session_1768030049723"
+        self.user_id = "test-user-1768030049723"
         
         try:
-            # We'll simulate the session creation by directly testing with the token
-            # In a real scenario, this would go through the OAuth flow
-            print(f"Generated test session token: {self.session_token}")
-            print(f"Generated test user ID: {self.user_id}")
+            print(f"Using test session token: {self.session_token}")
+            print(f"Using test user ID: {self.user_id}")
             
-            # Test if we can use this token (this will likely fail without proper session in DB)
+            # Test if we can use this token
             success, response = self.run_test("Test session validation", "GET", "auth/me", 200)
             
             if not success:
-                print("⚠️  Note: Authentication tests will be skipped - no valid session")
+                print("⚠️  Note: Authentication tests will be skipped - session validation failed")
                 self.session_token = None
                 self.user_id = None
                 return False
@@ -140,7 +136,7 @@ class ReceiptScannerAPITester:
             return True
             
         except Exception as e:
-            print(f"❌ Failed to create test session: {e}")
+            print(f"❌ Failed to validate test session: {e}")
             self.session_token = None
             self.user_id = None
             return False
