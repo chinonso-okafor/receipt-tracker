@@ -37,6 +37,9 @@ const Layout = ({ children }) => {
     { icon: FileText, label: "Reports", path: "/reports" },
   ];
 
+  // Admin nav item (separate for desktop sidebar only)
+  const adminItem = { icon: Settings, label: "Admin", path: "/admin" };
+
   const handleLogout = async () => {
     try {
       await fetch(`${API}/auth/logout`, {
