@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, createContext } from "react";
+import React, { useEffect, useState, createContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import Login from "@/pages/Login";
@@ -13,61 +13,6 @@ const API = `${BACKEND_URL}/api`;
 
 // Auth Context
 export const AuthContext = createContext(null);
-
-// Auth Callback Component - Handles session_id from Emergent Auth
-const AuthCallback = () => {
-  const navigate = useNavigate();
-  const hasProcessed = useRef(false);
-
-  useEffect(() => {
-    if (hasProcessed.current) return;
-    hasProcessed.current = true;
-
-    const processAuth = async () => {
-      const hash = window.location.hash;
-      const sessionIdMatch = hash.match(/session_id=([^&]+)/);
-      
-      if (!sessionIdMatch) {
-        navigate('/login');
-        return;
-      }
-
-      const sessionId = sessionIdMatch[1];
-
-      try {
-        const response = await fetch(`${API}/auth/session`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ session_id: sessionId })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create session');
-        }
-
-        const data = await response.json();
-        // Clear the hash and navigate to dashboard with user data
-        window.history.replaceState(null, '', window.location.pathname);
-        navigate('/dashboard', { state: { user: data.user } });
-      } catch (error) {
-        console.error('Auth error:', error);
-        navigate('/login');
-      }
-    };
-
-    processAuth();
-  }, [navigate]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Signing you in...</p>
-      </div>
-    </div>
-  );
-};
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -126,16 +71,7 @@ const ProtectedRoute = ({ children }) => {
   );
 };
 
-// App Router with session_id detection
 const AppRouter = () => {
-  const location = useLocation();
-
-  // CRITICAL: Check for session_id in URL hash FIRST (before ProtectedRoute runs)
-  // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-  if (location.hash?.includes('session_id=')) {
-    return <AuthCallback />;
-  }
-
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
